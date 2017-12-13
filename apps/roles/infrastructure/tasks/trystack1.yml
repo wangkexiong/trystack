@@ -18,8 +18,8 @@
     - {name: ftp, protocol: tcp, port_min: 20, port_max: 21, remote: 0.0.0.0/0}
     - {name: ftp-pasv, protocol: tcp, port_min: 30000, port_max: 30100, remote: 0.0.0.0/0}
     - {name: ssh, protocol: tcp, port_min: 22, port_max: 22, remote: 0.0.0.0/0}
-    - {name: vnc, protocol: tcp, port_min: 5901, port_max: 5902, remote: 0.0.0.0/0}
-    - {name: vnc, protocol: tcp, port_min: 6001, port_max: 6002, remote: 0.0.0.0/0}
+    - {name: vnc, protocol: tcp, port_min: 5966, port_max: 5966, remote: 0.0.0.0/0}
+    - {name: vnc, protocol: tcp, port_min: 6066, port_max: 6066, remote: 0.0.0.0/0}
     - {name: http, protocol: tcp, port_min: 80, port_max: 80, remote: 0.0.0.0/0}
     - {name: sync, protocol: tcp, port_min: 8888, port_max: 8888, remote: 0.0.0.0/0}
   tags: security

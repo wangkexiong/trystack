@@ -8,7 +8,7 @@ Vagrant.configure("2") do |c|
 
   c.vm.provider :virtualbox do |p|
     p.customize ["modifyvm", :id, "--nictype1", "Am79C973"]
-    p.customize ["modifyvm", :id, "--memory", "512"]
+    p.customize ["modifyvm", :id, "--memory", "1024"]
     p.gui = false
   end
 end

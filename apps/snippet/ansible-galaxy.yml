@@ -9,6 +9,6 @@
   roles:
     - {
         role: softasap.sa-vnc-remote-desktop,
-        vnc_password: s3cr3t
+        vnc_password: xxxxxx
       }
 ...

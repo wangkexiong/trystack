@@ -1,0 +1,19 @@
+---
+- name: Setup beijing
+  hosts: beijing
+  remote_user: ubuntu
+  gather_facts: yes
+  become: yes
+  become_method: sudo
+
+  roles:
+    - role: cloud-inventory
+      group_hosts: "{{ trystack1 }}"
+    - role: soft-ddclient
+      ddclient_protocol: "dyndns2"
+      ddclient_use:      "web, web=checkip.dynu.com"
+      ddclient_server:   "api.dynu.com"
+      ddclient_login:    "{{ lookup('env', 'DYNU_LOGIN') }}"
+      ddclient_password: "{{ lookup('env', 'DYNU_PWD') }}"
+      ddclient_domain:   "{{ lookup('env', 'BEIJING_DOMAIN') }}"
+...

@@ -14,24 +14,35 @@ environment:
     secure: PQBoJWK+vaxg2Yewc1FGIOB3CU613Vl3fpFKyLu5NBY=
   TRYSTACK_PWD2:
     secure: o3LyZbIg/AIVCE7UUQxwcPTFugoYU0LhNRfbnIRb9lY=
+  DYNU_LOGIN:
+    secure: Tkn2YxtQJD/Y/sCXOmRinw==
+  DYNU_PWD:
+    secure: LWZs37bISijJvPmw6HjTtg==
+  BEIJING_DOMAIN:
+    secure: a9NGzL8NZUvkxKEB75g2fOSwbw6I6yR/zQXpqmWlcJU=
 
 install:
   - nuget install secure-file -ExcludeVersion
   - secure-file\tools\secure-file -decrypt apps\roles\infrastructure\files\ansible_id.enc -secret %APPVEYOR_RDP_PASSWORD%
   - secure-file\tools\secure-file -decrypt apps\roles\infrastructure\files\ansible_id.pub.enc -secret %APPVEYOR_RDP_PASSWORD%
-  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_USER1/$TRYSTACK_USER1/g" apps\keystone_trystack1
-  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_PWD1/$TRYSTACK_PWD1/g" apps\keystone_trystack1
-  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_USER2/$TRYSTACK_USER2/g" apps\keystone_trystack2
-  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_PWD2/$TRYSTACK_PWD2/g" apps\keystone_trystack2
-  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_USER1/$TRYSTACK_USER1/g" apps\clouds.yml
-  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_USER2/$TRYSTACK_USER2/g" apps\clouds.yml
-  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_PWD1/$TRYSTACK_PWD1/g" apps\clouds.yml
-  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_PWD2/$TRYSTACK_PWD2/g" apps\clouds.yml
+  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_USER1/%TRYSTACK_USER1%/g" apps\keystone_trystack1
+  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_PWD1/%TRYSTACK_PWD1%/g" apps\keystone_trystack1
+  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_USER2/%TRYSTACK_USER2%/g" apps\keystone_trystack2
+  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_PWD2/%TRYSTACK_PWD2%/g" apps\keystone_trystack2
+  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_USER1/%TRYSTACK_USER1%/g" apps\clouds.yml
+  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_USER2/%TRYSTACK_USER2%/g" apps\clouds.yml
+  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_PWD1/%TRYSTACK_PWD1%/g" apps\clouds.yml
+  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_PWD2/%TRYSTACK_PWD2%/g" apps\clouds.yml
   - ps: .\vagrant.ps1
+  - echo export BEIJING_DOMAIN=%BEIJING_DOMAIN% > env_var.sh
+  - echo export DYNU_LOGIN=%DYNU_LOGIN% >> env_var.sh
+  - echo export DYNU_PWD=%DYNU_PWD% >> env_var.sh
 
 build_script:
   - vagrant up
-  - vagrant ssh -c "cd /vagrant/apps && chmod +x jobs.sh && ./jobs.sh"
+  - vagrant ssh -c "cp -r /vagrant/apps ~/apps"
+  - vagrant ssh -c "sudo apt install -y dos2unix && dos2unix /vagrant/env_var.sh"
+  - vagrant ssh -c "source /vagrant/env_var.sh && cd ~/apps && chmod +x abase.sh && ./abase.sh"
 
 #on_finish:
 #  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))

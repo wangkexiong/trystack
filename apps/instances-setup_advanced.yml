@@ -1,0 +1,74 @@
+---
+- name: Prepare Roles from Galaxy
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tasks:
+   - command: ansible-galaxy install -r requirements.yml --ignore-errors
+
+- name: Add /etc/hosts for trystack1
+  hosts: trystack1
+  remote_user: ubuntu
+  gather_facts: no
+  become: yes
+
+  roles:
+    - role: cloud-inventory
+      group_hosts: "{{ trystack1 }}"
+
+- name: Add /etc/hosts for trystack2
+  hosts: trystack2
+  remote_user: centos
+  gather_facts: no
+  become: yes
+
+  roles:
+    - role: cloud-inventory
+      group_hosts: "{{ trystack2 }}"
+
+- name: Setup beijing
+  hosts: beijing
+  remote_user: ubuntu
+  gather_facts: yes
+  become: yes
+  become_method: sudo
+
+  roles:
+    - ubuntu-k8s
+    - ubuntu-bt
+    - {
+        role: soft-vsftpd,
+        vsftpd_config: {
+          listen: "YES",
+          listen_ipv6: "NO",
+          anonymous_enable: "YES",
+          local_enable: "YES",
+          write_enable: "NO",
+          anon_root: /home/ubuntu/Downloads,
+          pasv_enable: "YES",
+          pasv_min_port: 30000,
+          pasv_max_port: 30100,
+          pasv_addr_resolve: "YES",
+          pasv_address: "{{ lookup('env', 'BEIJING_DOMAIN') }}"
+        },
+        vsftpd_users: [
+          {
+            username: vsftp,
+            password: '$1$somesalt$jezmI5TSY7mVTzHLgsK5L.'
+          },
+          {
+            username: wangkexiong,
+            password: '$1$somesalt$jezmI5TSY7mVTzHLgsK5L.'
+          }
+        ]
+      }
+    - role: ubuntu-vnc
+      password4vnc: "{{ lookup('env', 'VNC_PWD')|default('123456', true) }}"
+      port4vnc: "{{ lookup('env', 'VNC_PORT')|default('1', true) }}"
+    - role: soft-resiliosync
+      rslsync_user: ubuntu
+      rslsync_webui:
+        user:     "{{ lookup('env', 'SYNC_GUIUSER') }}"
+        password: "{{ lookup('env', 'SYNC_GUIPWD') }}"
+...
