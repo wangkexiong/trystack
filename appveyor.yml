@@ -1,0 +1,38 @@
+os: Default Azure
+
+platform:
+  - x64
+
+environment:
+  APPVEYOR_RDP_PASSWORD:
+    secure: Hj73NIE1ZHUH7DGShakR4Q==
+  TRYSTACK_USER1:
+    secure: z22OVJ3Gq9n9KEp6B/YxHrOveaW1t1M62Mxc6rjAu+Q=
+  TRYSTACK_PWD1:
+    secure: nWWnfvhWgJqt87RyWuEh6+yiM2ae4XO8Gj0pVNyODag=
+  TRYSTACK_USER2:
+    secure: PQBoJWK+vaxg2Yewc1FGIOB3CU613Vl3fpFKyLu5NBY=
+  TRYSTACK_PWD2:
+    secure: o3LyZbIg/AIVCE7UUQxwcPTFugoYU0LhNRfbnIRb9lY=
+
+install:
+  - nuget install secure-file -ExcludeVersion
+  - secure-file\tools\secure-file -decrypt apps\roles\infrastructure\files\ansible_id.enc -secret %APPVEYOR_RDP_PASSWORD%
+  - secure-file\tools\secure-file -decrypt apps\roles\infrastructure\files\ansible_id.pub.enc -secret %APPVEYOR_RDP_PASSWORD%
+  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_USER1/$TRYSTACK_USER1/g" apps\keystone_trystack1
+  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_PWD1/$TRYSTACK_PWD1/g" apps\keystone_trystack1
+  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_USER2/$TRYSTACK_USER2/g" apps\keystone_trystack2
+  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_PWD2/$TRYSTACK_PWD2/g" apps\keystone_trystack2
+  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_USER1/$TRYSTACK_USER1/g" apps\clouds.yml
+  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_USER2/$TRYSTACK_USER2/g" apps\clouds.yml
+  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_PWD1/$TRYSTACK_PWD1/g" apps\clouds.yml
+  - C:\cygwin64\bin\sed -i -e "s/\$TRYSTACK_PWD2/$TRYSTACK_PWD2/g" apps\clouds.yml
+  - ps: .\vagrant.ps1
+
+build_script:
+  - vagrant up
+  - vagrant ssh -c "cd /vagrant/apps && chmod +x jobs.sh && ./jobs.sh"
+
+#on_finish:
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
